@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Go Pub/Sub</title>
+</head>
+<body>
+  <h1>Publish</h1>
+  <input id="topic" placeholder="Topic" />
+  <input id="msg" placeholder="Message" />
+  <button onclick="publish()">Send</button>
+
+  <h1>Messages</h1>
+  <input id="subTopic" placeholder="Subscribe Topic" />
+  <button onclick="subscribe()">Subscribe</button>
+  <ul id="msgs"></ul>
+
+  <script>
+    function publish() {
+      fetch('/publish', {
+        method: 'POST',
+        body: JSON.stringify({
+          topic: document.getElementById('topic').value,
+          content: document.getElementById('msg').value
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    function subscribe() {
+      let topic = document.getElementById('subTopic').value;
+      let source = new EventSource('/subscribe?topic=' + topic);
+      source.onmessage = function(e) {
+        let msg = JSON.parse(e.data);
+        let li = document.createElement('li');
+        li.innerText = `#${msg.id} [${msg.topic}]: ${msg.content}`;
+        document.getElementById('msgs').appendChild(li);
+      };
+    }
+  </script>
+</body>
+</html>
