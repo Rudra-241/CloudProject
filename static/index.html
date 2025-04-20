@@ -1,41 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Go Pub/Sub</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    h1 {
+      color: #2c3e50;
+    }
+
+    .section {
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    input {
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      width: 200px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    li {
+      background: #e8f4ff;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 <body>
+
+<div class="section">
   <h1>Publish</h1>
   <input id="topic" placeholder="Topic" />
   <input id="msg" placeholder="Message" />
   <button onclick="publish()">Send</button>
+</div>
 
+<div class="section">
   <h1>Messages</h1>
   <input id="subTopic" placeholder="Subscribe Topic" />
   <button onclick="subscribe()">Subscribe</button>
   <ul id="msgs"></ul>
+</div>
 
-  <script>
-    function publish() {
-      fetch('/publish', {
-        method: 'POST',
-        body: JSON.stringify({
-          topic: document.getElementById('topic').value,
-          content: document.getElementById('msg').value
-        }),
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+<script>
+  function publish() {
+    fetch('/publish', {
+      method: 'POST',
+      body: JSON.stringify({
+        topic: document.getElementById('topic').value,
+        content: document.getElementById('msg').value
+      }),
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 
-    function subscribe() {
-      let topic = document.getElementById('subTopic').value;
-      let source = new EventSource('/subscribe?topic=' + topic);
-      source.onmessage = function(e) {
-        let msg = JSON.parse(e.data);
-        let li = document.createElement('li');
-        li.innerText = `#${msg.id} [${msg.topic}]: ${msg.content}`;
-        document.getElementById('msgs').appendChild(li);
-      };
-    }
-  </script>
+  function subscribe() {
+    let topic = document.getElementById('subTopic').value;
+    let source = new EventSource('/subscribe?topic=' + topic);
+    source.onmessage = function(e) {
+      let msg = JSON.parse(e.data);
+      let li = document.createElement('li');
+      li.textContent = JSON.stringify(msg, null, 2); // pretty-printed JSON
+      document.getElementById('msgs').appendChild(li);
+    };
+  }
+</script>
+
 </body>
 </html>
